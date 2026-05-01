@@ -18,7 +18,7 @@
   <scriptVariant>Russian</scriptVariant>
   <defaultRoles>Role.ЧтениеКлючейШифрования</defaultRoles>
   <vendor>3230</vendor>
-  <version>3</version>
+  <version>4</version>
   <usedMobileApplicationFunctionalities>
     <functionality>
       <use>true</use>
