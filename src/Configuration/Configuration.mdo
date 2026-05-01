@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Configuration xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="5ee02324-0e10-49f5-b5ba-10da650186dc">
+  <name>Шифрование</name>
+  <synonym>
+    <key>ru</key>
+    <value>Шифрование</value>
+  </synonym>
+  <containedObjects classId="9cd510cd-abfc-11d4-9434-004095e12fc7" objectId="bb887f2b-7a79-4c2e-8c7a-a04742d81039"/>
+  <containedObjects classId="9fcd25a0-4822-11d4-9414-008048da11f9" objectId="3ceff516-9d1b-4bb8-931b-1b9fb24837c1"/>
+  <containedObjects classId="e3687481-0a87-462c-a166-9f34594f9bba" objectId="060f92b7-891e-48ab-a6ba-87313ab95054"/>
+  <containedObjects classId="9de14907-ec23-4a07-96f0-85521cb6b53b" objectId="ec42a458-163a-40f9-97c6-243f0028b6f7"/>
+  <containedObjects classId="51f2d5d8-ea4d-4064-8892-82951750031e" objectId="6aaff356-33d2-4000-b7e2-412840aaf365"/>
+  <containedObjects classId="e68182ea-4237-4383-967f-90c1e3370bc7" objectId="f2fb8735-bc17-4d86-bea5-500996b04669"/>
+  <containedObjects classId="fb282519-d103-4dd3-bc12-cb271d631dfc" objectId="02c595ee-68fa-4ad0-b8bb-0cb5f44948c4"/>
+  <configurationExtensionCompatibilityMode>8.3.27</configurationExtensionCompatibilityMode>
+  <defaultRunMode>ManagedApplication</defaultRunMode>
+  <usePurposes>PersonalComputer</usePurposes>
+  <scriptVariant>Russian</scriptVariant>
+  <defaultRoles>Role.ЧтениеКлючейШифрования</defaultRoles>
+  <vendor>3230</vendor>
+  <version>3</version>
+  <usedMobileApplicationFunctionalities>
+    <functionality>
+      <use>true</use>
+    </functionality>
+    <functionality>
+      <functionality>OSBackup</functionality>
+      <use>true</use>
+    </functionality>
+  </usedMobileApplicationFunctionalities>
+  <defaultLanguage>Language.Русский</defaultLanguage>
+  <dataLockControlMode>Managed</dataLockControlMode>
+  <objectAutonumerationMode>NotAutoFree</objectAutonumerationMode>
+  <modalityUseMode>DontUse</modalityUseMode>
+  <synchronousPlatformExtensionAndAddInCallUseMode>DontUse</synchronousPlatformExtensionAndAddInCallUseMode>
+  <compatibilityMode>8.3.27</compatibilityMode>
+  <languages uuid="8d14102a-36f3-47f9-b7dd-6b1f2973caac">
+    <name>Русский</name>
+    <synonym>
+      <key>ru</key>
+      <value>Русский</value>
+    </synonym>
+    <languageCode>ru</languageCode>
+  </languages>
+  <subsystems>Subsystem.Шифрование</subsystems>
+  <roles>Role.ЧтениеКлючейШифрования</roles>
+  <commonModules>CommonModule.ШифрованиеКлиентСервер</commonModules>
+  <commonModules>CommonModule.ШифрованиеВызовСервераПовтИсп</commonModules>
+</mdclass:Configuration>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<distributionSupport:DistributionSupport xmlns:distributionSupport="http://g5.1c.ru/v8/dt/distribution/model" version="6" updateAvailable="true">
+  <distributives key="bc2170c8-e4a2-43e3-b216-bbf4dcaa8267" value="ProtectMode"/>
+  <distributives key="0b7f4c38-6835-4c5b-93d0-49f6195ffcfe" value="ProtectMode"/>
+  <distributives key="8d14102a-36f3-47f9-b7dd-6b1f2973caac" value="NotIncludeInUserConfigByDefault"/>
+  <distributives key="b9c13eda-b947-4b8e-86c4-30788c32ecf6" value="ProtectMode"/>
+  <objectModules key="0b7f4c38-6835-4c5b-93d0-49f6195ffcfe" value="false"/>
+</distributionSupport:DistributionSupport>
