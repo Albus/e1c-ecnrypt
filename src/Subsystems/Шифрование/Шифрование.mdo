@@ -11,7 +11,6 @@
       <lang>ru</lang>
     </pages>
   </help>
-  <content>CommonModule.ШифрованиеКлиентСервер</content>
   <content>CommonModule.ШифрованиеВызовСервераПовтИсп</content>
   <content>Role.ЧтениеКлючейШифрования</content>
 </mdclass:Subsystem>

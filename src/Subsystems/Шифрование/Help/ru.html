@@ -1,178 +1,271 @@
-<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Модуль «Шифрование» — справочная информация</title>
+    <title>Подсистема «Шифрование» — руководство для разработчиков</title>
 </head>
-<body>
+<body style="font-family: 'Segoe UI', Verdana, Arial, sans-serif; font-size: 14px; background: #f5f7fa; color: #333333; margin: 0; padding: 0;">
 
-<h1>Модуль «Шифрование»</h1>
-<p>Предоставляет функции для конфиденциальной обработки данных (симметричное шифрование/расшифровка), генерации криптографических ключей и вычисления хеш-сумм.</p>
-<p><strong>Область выполнения:</strong> только на сервере (недоступен в мобильном приложении и на клиенте).</p>
+<!-- Основной контейнер -->
+<div style="max-width: 960px; margin: 30px auto; background: #ffffff; padding: 40px 40px 50px 40px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
 
-<hr>
+    <!-- Заголовок -->
+    <h1 style="font-size: 28px; color: #1a3b5d; margin-top: 0; margin-bottom: 8px; font-weight: 600;">Подсистема «Шифрование»</h1>
+    <p style="font-size: 16px; color: #4a5568; margin-top: 0; margin-bottom: 30px; line-height: 1.5;">Руководство для разработчиков по использованию симметричного шифрования и управлению ключами.</p>
 
-<h2>Публичное API</h2>
-<ul>
-    <li><a href="#Обработать">Обработать(Данные, Ключ)</a> — симметричное шифрование / расшифровка</li>
-    <li><a href="#Ключ">Ключ(УИД)</a> — генерация ключа по уникальному идентификатору</li>
-    <li><a href="#Хеш">Хеш(Данные)</a> — вычисление хеш-суммы</li>
-</ul>
+    <!-- Введение -->
+    <div style="background: #eef2ff; border-left: 4px solid #5a67d8; padding: 15px 20px; margin-bottom: 30px; border-radius: 4px;">
+        <p style="margin: 0; color: #2d3748; line-height: 1.6;">
+            Подсистема предоставляет возможность конфиденциальной обработки данных с использованием устойчивого симметричного шифрования.
+            Ключ шифрования автоматически вычисляется на основе <strong>уникального идентификатора (УИД)</strong> объекта метаданных.
+            Одна и та же операция выполняет и зашифрование, и расшифрование — повторный вызов с теми же параметрами восстанавливает исходные данные.
+        </p>
+    </div>
+    <p style="margin-bottom: 20px;">Детали алгоритма и механизм генерации ключа полностью <strong>скрыты</strong> внутри реализации. Публичный интерфейс оперирует только высокоуровневыми типами: <code style="background: #edf2f7; padding: 2px 6px; border-radius: 3px; font-family: monospace;">ДвоичныеДанные</code>, <code style="background: #edf2f7; padding: 2px 6px; border-radius: 3px; font-family: monospace;">УникальныйИдентификатор</code> и адресами временного хранилища.</p>
 
-<hr>
+    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 25px 0;">
 
-<h2 id="Обработать">Функция Обработать(Данные, Ключ)</h2>
-<p>Выполняет симметричную криптографическую обработку переданных двоичных данных. Одна и та же функция используется как для зашифрования, так и для расшифрования: повторный вызов с тем же ключом восстанавливает исходные данные.</p>
-<p><strong>Сигнатура:</strong> <code>Обработать(Данные, Ключ)</code></p>
+    <!-- Состав модулей -->
+    <h2 style="font-size: 22px; color: #2c5282; margin-bottom: 15px; font-weight: 600;">1. Состав модулей подсистемы</h2>
+    <p>Подсистема включает три общих модуля, каждый из которых имеет свои флаги доступности и особенности кеширования.</p>
 
-<h3>Параметры</h3>
-<table border="1" cellpadding="4" cellspacing="0">
-    <tr>
-        <th>Имя</th>
-        <th>Тип</th>
-        <th>Описание</th>
-    </tr>
-    <tr>
-        <td>Данные</td>
-        <td>ДвоичныеДанные</td>
-        <td>Открытый текст (для шифрования) или шифротекст (для расшифровки).</td>
-    </tr>
-    <tr>
-        <td>Ключ</td>
-        <td>ДвоичныеДанные, УникальныйИдентификатор</td>
-        <td>Секретный ключ. Может быть передан непосредственно (как <code>ДвоичныеДанные</code>) или указан как уникальный идентификатор объекта. При передаче <code>УникальныйИдентификатор</code> ключ автоматически вычисляется через функцию <code>Ключ()</code>.</td>
-    </tr>
-</table>
+    <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        <thead>
+            <tr style="background: #2c5282; color: #ffffff;">
+                <th style="padding: 12px 15px; text-align: left; font-weight: 600; width: 25%;">Модуль</th>
+                <th style="padding: 12px 15px; text-align: left; font-weight: 600; width: 25%;">Флаги</th>
+                <th style="padding: 12px 15px; text-align: left; font-weight: 600; width: 50%;">Назначение и публичные методы</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="background: #ffffff;">
+                <td style="padding: 12px 15px; border-bottom: 1px solid #e2e8f0; vertical-align: top;"><strong>ШифрованиеВызовСервераПовтИсп</strong></td>
+                <td style="padding: 12px 15px; border-bottom: 1px solid #e2e8f0; vertical-align: top;">
+                    <span style="display: inline-block; background: #ebf4ff; color: #2c5282; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 4px;">Сервер</span>
+                    <span style="display: inline-block; background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 4px;">Вызов сервера</span>
+                    <span style="display: inline-block; background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 12px; font-size: 12px;">Кэш сеанса</span>
+                </td>
+                <td style="padding: 12px 15px; border-bottom: 1px solid #e2e8f0; vertical-align: top;">
+                    Предоставляет интерфейс для клиентского кода. Данные передаются только через адрес временного хранилища. Кеширует результаты на время сеанса.
+                    <br><strong style="color: #2c5282;">Методы:</strong>
+                    <ul style="margin: 8px 0 0 20px; padding: 0;">
+                        <li><code style="background: #edf2f7; padding: 1px 5px; border-radius: 3px;">ЕстьПравоНаШифрование()</code></li>
+                        <li><code style="background: #edf2f7; padding: 1px 5px; border-radius: 3px;">ОбработатьАдресВременногоХранилища(Адрес, УИД)</code></li>
+                    </ul>
+                </td>
+            </tr>
+            <tr style="background: #f7fafc;">
+                <td style="padding: 12px 15px; border-bottom: 1px solid #e2e8f0; vertical-align: top;"><strong>ШифрованиеСервер</strong></td>
+                <td style="padding: 12px 15px; border-bottom: 1px solid #e2e8f0; vertical-align: top;">
+                    <span style="display: inline-block; background: #ebf4ff; color: #2c5282; padding: 2px 8px; border-radius: 12px; font-size: 12px;">Сервер</span>
+                </td>
+                <td style="padding: 12px 15px; border-bottom: 1px solid #e2e8f0; vertical-align: top;">
+                    Содержит базовую реализацию <strong>без кеширования</strong>. Доступен исключительно в серверном контексте (не вызов сервера).
+                    <br><strong style="color: #2c5282;">Служебные методы:</strong>
+                    <ul style="margin: 8px 0 0 20px; padding: 0;">
+                        <li><code style="background: #edf2f7; padding: 1px 5px; border-radius: 3px;">ОбработатьДвоичныеДанные(Данные, УИД)</code></li>
+                        <li><code style="background: #edf2f7; padding: 1px 5px; border-radius: 3px;">ОбработатьАдресВременногоХранилища(Адрес, УИД)</code></li>
+                    </ul>
+                </td>
+            </tr>
+            <tr style="background: #ffffff;">
+                <td style="padding: 12px 15px; vertical-align: top;"><strong>ШифрованиеСерверПовтИсп</strong></td>
+                <td style="padding: 12px 15px; vertical-align: top;">
+                    <span style="display: inline-block; background: #ebf4ff; color: #2c5282; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 4px;">Сервер</span>
+                    <span style="display: inline-block; background: #d4edda; color: #155724; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 4px;">Внеш.соед.</span>
+                    <span style="display: inline-block; background: #f8d7da; color: #721c24; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-right: 4px;">Обычн.клиент</span>
+                    <span style="display: inline-block; background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 12px; font-size: 12px;">Кэш сеанса</span>
+                </td>
+                <td style="padding: 12px 15px; vertical-align: top;">
+                    Предоставляет кеширующий доступ к операции с <strong>двоичными данными</strong>. Доступен не только на сервере, но и во внешнем соединении и обычном (толстом) клиенте.
+                    <br><strong style="color: #2c5282;">Метод:</strong>
+                    <ul style="margin: 8px 0 0 20px; padding: 0;">
+                        <li><code style="background: #edf2f7; padding: 1px 5px; border-radius: 3px;">ОбработатьДвоичныеДанные(Данные, УИД)</code></li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
-<h3>Возвращаемое значение</h3>
-<p><strong>ДвоичныеДанные</strong> — результат операции.</p>
+    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 25px 0;">
 
-<h3>Исключения</h3>
-<ul>
-    <li>Если <code>Ключ</code> не является типом <code>ДвоичныеДанные</code> или <code>УникальныйИдентификатор</code>:<br>
-        «Ключ может быть типа УникальныйИдентифкатор или ДвоичныеДанные».</li>
-    <li>Если ключ пуст (не заполнен):<br>
-        «Ключ шифрования не может быть пустым значением».</li>
-    <li>При передаче <code>УникальныйИдентификатор</code> могут дополнительно сработать исключения функции <code>Ключ</code> (см. ниже).</li>
-</ul>
+    <!-- Клиентские методы -->
+    <h2 style="font-size: 22px; color: #2c5282; margin-bottom: 15px; font-weight: 600;">2. Публичные методы для клиентского кода</h2>
+    <p>Все клиентские вызовы должны выполняться через модуль <code style="background: #edf2f7; padding: 2px 6px; border-radius: 3px; font-family: monospace;">ШифрованиеВызовСервераПовтИсп</code>. Прямая передача двоичных данных запрещена — используется временное хранилище.</p>
 
-<h3>Примеры</h3>
-<p><strong>С ключом, полученным заранее</strong></p>
-<pre><code>// Получение ключа
-ДвоичныйКлюч = Шифрование.Ключ(УИД);
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px 25px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <h3 style="margin-top: 0; color: #2d3748; font-size: 18px; margin-bottom: 10px;">ОбработатьАдресВременногоХранилища(Адрес, УИД)</h3>
+        <p style="margin-top: 0;">Выполняет шифрование или расшифрование данных, размещённых во временном хранилище. Результат также помещается во временное хранилище и возвращается его адрес.</p>
+
+        <h4 style="font-size: 15px; color: #4a5568; margin-bottom: 6px;">Параметры</h4>
+        <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 1px solid #e2e8f0;">
+            <tr style="background: #f7fafc;">
+                <th style="padding: 8px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; width: 15%;">Имя</th>
+                <th style="padding: 8px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; width: 20%;">Тип</th>
+                <th style="padding: 8px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; width: 65%;">Описание</th>
+            </tr>
+            <tr>
+                <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0;"><code>Адрес</code></td>
+                <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0;">Строка</td>
+                <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0;">Адрес временного хранилища, полученный через <code style="background: #edf2f7; padding: 1px 4px; border-radius: 3px;">ПоместитьВоВременноеХранилище</code>. Непустая строка, действительный адрес.</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 12px;"><code>УИД</code></td>
+                <td style="padding: 8px 12px;">УникальныйИдентификатор</td>
+                <td style="padding: 8px 12px;">Уникальный идентификатор объекта, из которого будет сгенерирован ключ. Не может быть пустым.</td>
+            </tr>
+        </table>
+
+        <h4 style="font-size: 15px; color: #4a5568; margin-bottom: 6px;">Возвращаемое значение</h4>
+        <p><strong>Строка</strong> — адрес временного хранилища с результатом операции.</p>
+
+        <div style="background: #fefcbf; border-left: 4px solid #ecc94b; padding: 10px 15px; margin: 15px 0; border-radius: 4px;">
+            <strong>Исключения:</strong>
+            <ul style="margin: 5px 0 0 20px; padding: 0;">
+                <li>«Ожидается Строка» – неверный тип адреса.</li>
+                <li>«Ожидается не пустая Строка» – пустой адрес.</li>
+                <li>«Ожидается адрес временного хранилища» – строка не является адресом.</li>
+                <li>«Нет прав для чтения ключей шифрования (роль: ЧтениеКлючейШифрования)» – отсутствует роль.</li>
+            </ul>
+        </div>
+
+        <h4 style="font-size: 15px; color: #4a5568; margin-bottom: 6px;">Пример использования (клиент)</h4>
+        <pre style="background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 6px; overflow-x: auto; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 13px; line-height: 1.4;"><code>// Исходные данные
+ДвоичныеДанные = ПолучитьДвоичныеДанныеИзСтроки("Важный текст", "UTF-8");
+ИсходныйАдрес = ПоместитьВоВременноеХранилище(ДвоичныеДанные);
+
+// Уникальный идентификатор объекта
+УИД = СсылкаНаОбъект.УникальныйИдентификатор();
 
 // Шифрование
-ЗашифрованныеДанные = Шифрование.Обработать(ОткрытыеДанные, ДвоичныйКлюч);
+АдресРезультата = ШифрованиеВызовСервераПовтИсп.ОбработатьАдресВременногоХранилища(ИсходныйАдрес, УИД);
+ЗашифрованныеДанные = ПолучитьИзВременногоХранилища(АдресРезультата);
 
-// Расшифровка
-РасшифрованныеДанные = Шифрование.Обработать(ЗашифрованныеДанные, ДвоичныйКлюч);</code></pre>
+// Расшифровка (тот же вызов)
+АдресРасшифровки = ШифрованиеВызовСервераПовтИсп.ОбработатьАдресВременногоХранилища(АдресРезультата, УИД);
+РасшифрованныеДанные = ПолучитьИзВременногоХранилища(АдресРасшифровки);
+</code></pre>
+        <p style="margin-top: 8px; font-style: italic; color: #5a67d8;"><strong>⚡ Кеширование:</strong> повторный вызов с теми же параметрами в рамках сеанса вернёт тот же адрес без повторной обработки.</p>
+    </div>
 
-<p><strong>С ключом-идентификатором (автоматическая генерация)</strong></p>
-<pre><code>// Передаём уникальный идентификатор прямо в вызов
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px 25px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <h3 style="margin-top: 0; color: #2d3748; font-size: 18px; margin-bottom: 10px;">ЕстьПравоНаШифрование()</h3>
+        <p>Проверяет наличие у текущего пользователя роли <strong>ЧтениеКлючейШифрования</strong>, необходимой для выполнения операций шифрования.</p>
+        <h4 style="font-size: 15px; color: #4a5568; margin-bottom: 6px;">Возвращаемое значение</h4>
+        <p><strong>Булево</strong> — <code style="background: #edf2f7; padding: 2px 6px; border-radius: 3px; font-family: monospace;">Истина</code>, если роль назначена.</p>
+        <h4 style="font-size: 15px; color: #4a5568; margin-bottom: 6px;">Пример</h4>
+        <pre style="background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 6px; overflow-x: auto; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 13px; line-height: 1.4;"><code>Если ШифрованиеВызовСервераПовтИсп.ЕстьПравоНаШифрование() Тогда
+    // вызов методов шифрования
+КонецЕсли;
+</code></pre>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 25px 0;">
+
+    <!-- Серверные методы -->
+    <h2 style="font-size: 22px; color: #2c5282; margin-bottom: 15px; font-weight: 600;">3. Методы для серверного кода</h2>
+    <p>В серверном контексте доступны как некэшируемая базовая реализация, так и кеширующие обёртки. Выбор зависит от необходимости гарантированного выполнения или ускорения повторных вызовов.</p>
+
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px 25px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <h3 style="margin-top: 0; color: #2d3748; font-size: 18px; margin-bottom: 10px;">ОбработатьДвоичныеДанные(Данные, УИД)</h3>
+        <p>Обрабатывает переданные двоичные данные (шифрует или расшифровывает) с автоматической генерацией ключа из УИД.</p>
+        <div style="margin-bottom: 15px;">
+            <p style="margin: 5px 0;"><strong>Без кеширования:</strong> <code style="background: #edf2f7; padding: 2px 6px; border-radius: 3px;">ШифрованиеСервер.ОбработатьДвоичныеДанные(...)</code></p>
+            <p style="margin: 5px 0;"><strong>С кешированием (на время сеанса):</strong> <code style="background: #edf2f7; padding: 2px 6px; border-radius: 3px;">ШифрованиеСерверПовтИсп.ОбработатьДвоичныеДанные(...)</code></p>
+        </div>
+
+        <h4 style="font-size: 15px; color: #4a5568; margin-bottom: 6px;">Параметры</h4>
+        <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 1px solid #e2e8f0;">
+            <tr style="background: #f7fafc;">
+                <th style="padding: 8px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; width: 15%;">Имя</th>
+                <th style="padding: 8px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; width: 20%;">Тип</th>
+                <th style="padding: 8px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; width: 65%;">Описание</th>
+            </tr>
+            <tr>
+                <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0;"><code>Данные</code></td>
+                <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0;">ДвоичныеДанные</td>
+                <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0;">Исходные данные (открытый текст или шифротекст). Не могут быть пустыми.</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 12px;"><code>УИД</code></td>
+                <td style="padding: 8px 12px;">УникальныйИдентификатор</td>
+                <td style="padding: 8px 12px;">Идентификатор объекта, на основе которого формируется ключ.</td>
+            </tr>
+        </table>
+
+        <h4 style="font-size: 15px; color: #4a5568; margin-bottom: 6px;">Возвращаемое значение</h4>
+        <p><strong>ДвоичныеДанные</strong> — результат операции.</p>
+
+        <h4 style="font-size: 15px; color: #4a5568; margin-bottom: 6px;">Примеры</h4>
+        <pre style="background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 6px; overflow-x: auto; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 13px; line-height: 1.4;"><code>// Серверный код без кеширования
+Данные = ПолучитьДвоичныеДанныеИзСтроки("Секретные данные", "UTF-8");
 УИД = СсылкаНаОбъект.УникальныйИдентификатор();
+Результат = ШифрованиеСервер.ОбработатьДвоичныеДанные(Данные, УИД);
 
-// Шифрование – ключ сгенерируется автоматически
-ЗашифрованныеДанные = Шифрование.Обработать(ОткрытыеДанные, УИД);
+// С кешированием (подходит для многократных вызовов с одинаковыми параметрами)
+РезультатКеш = ШифрованиеСерверПовтИсп.ОбработатьДвоичныеДанные(Данные, УИД);
+</code></pre>
+    </div>
 
-// Расшифровка с тем же УИД (даст тот же ключ)
-РасшифрованныеДанные = Шифрование.Обработать(ЗашифрованныеДанные, УИД);</code></pre>
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px 25px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <h3 style="margin-top: 0; color: #2d3748; font-size: 18px; margin-bottom: 10px;">ОбработатьАдресВременногоХранилища(Адрес, УИД) на сервере</h3>
+        <p>Аналогичен клиентскому методу, но может вызываться напрямую в серверном коде без дополнительного серверного вызова. Доступен как с кешированием, так и без.</p>
+        <div style="margin-bottom: 15px;">
+            <p style="margin: 5px 0;"><strong>Без кеширования:</strong> <code style="background: #edf2f7; padding: 2px 6px; border-radius: 3px;">ШифрованиеСервер.ОбработатьАдресВременногоХранилища(...)</code></p>
+            <p style="margin: 5px 0;"><strong>С кешированием:</strong> <code style="background: #edf2f7; padding: 2px 6px; border-radius: 3px;">ШифрованиеВызовСервераПовтИсп.ОбработатьАдресВременногоХранилища(...)</code></p>
+        </div>
+        <pre style="background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 6px; overflow-x: auto; font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: 13px; line-height: 1.4;"><code>// Без кеширования
+АдресРезультата = ШифрованиеСервер.ОбработатьАдресВременногоХранилища(ИсходныйАдрес, УИД);
 
-<hr>
+// С кешированием
+АдресРезультата = ШифрованиеВызовСервераПовтИсп.ОбработатьАдресВременногоХранилища(ИсходныйАдрес, УИД);
+</code></pre>
+    </div>
 
-<h2 id="Ключ">Функция Ключ(УИД)</h2>
-<p>Формирует криптографический ключ на основе уникального идентификатора объекта метаданных. Ключ вычисляется с использованием криптостойких преобразований и зависит от переданного идентификатора.</p>
-<p><strong>Сигнатура:</strong> <code>Ключ(УИД)</code></p>
+    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 25px 0;">
 
-<h3>Параметры</h3>
-<table border="1" cellpadding="4" cellspacing="0">
-    <tr>
-        <th>Имя</th>
-        <th>Тип</th>
-        <th>Описание</th>
-    </tr>
-    <tr>
-        <td>УИД</td>
-        <td>УникальныйИдентификатор</td>
-        <td>Непустой уникальный идентификатор объекта, используемый как соль.</td>
-    </tr>
-</table>
+    <!-- Клиент-серверное взаимодействие и кеширование -->
+    <h2 style="font-size: 22px; color: #2c5282; margin-bottom: 15px; font-weight: 600;">4. Логика клиент-серверного взаимодействия и кеширования</h2>
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 20px 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <ul style="list-style: none; padding: 0; margin: 0;">
+            <li style="margin-bottom: 12px; padding-left: 25px; position: relative;">
+                <span style="position: absolute; left: 0; color: #5a67d8; font-weight: bold;">→</span>
+                <strong>Клиент → Сервер:</strong> Модуль <code style="background: #edf2f7; padding: 2px 6px; border-radius: 3px;">ШифрованиеВызовСервераПовтИсп</code> имеет флаг «Вызов сервера», поэтому его экспортные методы прозрачно вызываются с клиента. Клиент передаёт только адрес временного хранилища и уникальный идентификатор, что минимизирует объём передаваемых данных и скрывает реализацию шифрования.
+            </li>
+            <li style="margin-bottom: 12px; padding-left: 25px; position: relative;">
+                <span style="position: absolute; left: 0; color: #d69e2e; font-weight: bold;">⏱</span>
+                <strong>Кеширование «На время сеанса»:</strong> Модули с суффиксом «ПовтИсп» повторно используют возвращаемые значения при идентичных параметрах в течение жизни сеанса. Это ускоряет работу, так как исключает повторные криптографические вычисления. Кеш автоматически сбрасывается при завершении сеанса.
+            </li>
+            <li style="margin-bottom: 12px; padding-left: 25px; position: relative;">
+                <span style="position: absolute; left: 0; color: #e53e3e; font-weight: bold;">✖</span>
+                <strong>Модуль без кеширования (<code>ШифрованиеСервер</code>):</strong> Полезен, когда необходимо гарантированно выполнить операцию без использования сохранённого значения (например, при отладке или в сценариях с изменяющимся контекстом).
+            </li>
+            <li style="margin-bottom: 12px; padding-left: 25px; position: relative;">
+                <span style="position: absolute; left: 0; color: #38a169; font-weight: bold;">●</span>
+                <strong>Особый контекст доступа:</strong> Модуль <code style="background: #edf2f7; padding: 2px 6px; border-radius: 3px;">ШифрованиеСерверПовтИсп</code> дополнительно доступен во внешнем соединении и обычном (толстом) клиенте, что позволяет использовать кешированную обработку двоичных данных напрямую в этих режимах, не прибегая к временному хранилищу.
+            </li>
+        </ul>
+    </div>
 
-<h3>Возвращаемое значение</h3>
-<p><strong>ДвоичныеДанные</strong> — ключ шифрования.</p>
+    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 25px 0;">
 
-<h3>Исключения</h3>
-<ul>
-    <li>Если параметр не является заполненным уникальным идентификатором:<br>
-        «Генератор ключа шифрования принимает параметром только значение типа УникальныйИдентификатор».</li>
-    <li>Если отсутствует роль <strong>ЧтениеКлючейШифрования</strong>:<br>
-        «Нет прав для чтения ключей шифрования (роль: ЧтениеКлючейШифрования)».</li>
-</ul>
+    <!-- Рекомендации -->
+    <h2 style="font-size: 22px; color: #2c5282; margin-bottom: 15px; font-weight: 600;">5. Рекомендации по использованию</h2>
+    <div style="background: #f0fff4; border: 1px solid #c6f6d5; border-radius: 6px; padding: 20px 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <ol style="margin: 0; padding-left: 20px; color: #2d3748; line-height: 1.6;">
+            <li>В клиентском коде всегда используйте <code style="background: #c6f6d5; padding: 1px 5px; border-radius: 3px;">ШифрованиеВызовСервераПовтИсп.ОбработатьАдресВременногоХранилища</code>.</li>
+            <li>Перед выполнением операций шифрования проверяйте наличие прав через <code style="background: #c6f6d5; padding: 1px 5px; border-radius: 3px;">ЕстьПравоНаШифрование()</code>.</li>
+            <li>На сервере, если предполагаются частые вызовы с одинаковыми параметрами (например, в цикле), отдавайте предпочтение кеширующим методам для повышения производительности.</li>
+            <li>Никогда не пытайтесь обращаться к методам модуля <code style="background: #c6f6d5; padding: 1px 5px; border-radius: 3px;">ШифрованиеСервер</code> с клиента — они недоступны.</li>
+            <li>Не сохраняйте сгенерированные ключи в открытом виде; все операции с ключами инкапсулированы внутри подсистемы.</li>
+            <li>Для больших данных всегда применяйте временное хранилище — это справедливо и для серверного кода, если данные перемещаются между сеансами или контекстами.</li>
+        </ol>
+    </div>
 
-<h3>Пример</h3>
-<pre><code>// Получение идентификатора
-УИД = СсылкаНаОбъект.УникальныйИдентификатор();
+    <div style="margin-top: 30px; font-size: 13px; color: #a0aec0; border-top: 1px solid #e2e8f0; padding-top: 15px; text-align: right;">
+        Документация актуальна на 01.05.2026. Публичный интерфейс стабилен.
+    </div>
 
-// Генерация ключа
-КлючШифрования = Шифрование.Ключ(УИД);</code></pre>
-
-<hr>
-
-<h2 id="Хеш">Функция Хеш(Данные)</h2>
-<p>Вычисляет хеш-сумму переданных данных.</p>
-<p><strong>Сигнатура:</strong> <code>Хеш(Данные)</code></p>
-
-<h3>Параметры</h3>
-<table border="1" cellpadding="4" cellspacing="0">
-    <tr>
-        <th>Имя</th>
-        <th>Тип</th>
-        <th>Описание</th>
-    </tr>
-    <tr>
-        <td>Данные</td>
-        <td>Строка, ДвоичныеДанные</td>
-        <td>Непустые исходные данные.</td>
-    </tr>
-</table>
-
-<h3>Возвращаемое значение</h3>
-<p><strong>ДвоичныеДанные</strong> — хеш-сумма.</p>
-
-<h3>Исключения</h3>
-<ul>
-    <li>Если тип параметра не <code>Строка</code> и не <code>ДвоичныеДанные</code>:<br>
-        «Генератор хеша принимает параметром только значение типов Строка|ДвоичныеДанные».</li>
-    <li>Если параметр пуст:<br>
-        «Генератор хеша принимает параметром только не пустое значение».</li>
-</ul>
-
-<h3>Пример</h3>
-<pre><code>// Хеширование строки
-ХешСтроки = Шифрование.Хеш("Контрольная строка");
-
-// Хеширование двоичных данных
-ДвоичныеДанные = ПолучитьДвоичныеДанныеИзСтроки("Данные", "UTF-8");
-ХешДвоичных = Шифрование.Хеш(ДвоичныеДанные);</code></pre>
-
-<hr>
-
-<h2>Требования к безопасности</h2>
-<ul>
-    <li>Функция <strong>Ключ</strong> требует наличия роли <strong>ЧтениеКлючейШифрования</strong>.</li>
-    <li>Функции <strong>Обработать</strong> и <strong>Хеш</strong> дополнительных прав не требуют.</li>
-    <li>Все функции предназначены только для серверного кода.</li>
-</ul>
-
-<h2>Рекомендации</h2>
-<ol>
-    <li>Для каждого защищаемого объекта генерируйте отдельный ключ (через <code>Ключ</code>) или используйте <code>УИД</code> объекта прямо в вызове <code>Обработать</code>.</li>
-    <li>Не сохраняйте ключ в открытом виде в информационной базе.</li>
-    <li>При обработке больших объёмов данных разбивайте их на фрагменты — функция поддерживает последовательную обработку.</li>
-    <li>Для контроля целостности применяйте <code>Хеш</code> или дополнительные меры.</li>
-</ol>
-
-<hr>
-<p>Документация актуальна на 01.05.2026. Публичный интерфейс стабилен.</p>
+</div>
 
 </body>
 </html>
