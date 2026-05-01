@@ -13,4 +13,5 @@
   </help>
   <content>CommonModule.ШифрованиеВызовСервераПовтИсп</content>
   <content>Role.ЧтениеКлючейШифрования</content>
+  <content>CommonModule.ШифрованиеСервер</content>
 </mdclass:Subsystem>
